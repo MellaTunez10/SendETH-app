@@ -55,24 +55,17 @@ document.getElementById("sendETH").addEventListener("click", async () => {
 
     try {
         const signerAddress = await signer.getAddress(); // Get the signer's address
-        const balance = await provider.getBalance(signerAddress); // Fetch the balance
-        const balanceInEther = ethers.formatEther(balance); // Convert balance from BigNumber to ether string
+        const balance = await provider.getBalance(signerAddress); // Fetch the balance as a bigint
 
         const feeData = await provider.getFeeData();
-        const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice; // For EIP-1559 or legacy transactions
-        const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || feeData.gasPrice; // For EIP-1559 or legacy transactions
+        const gasPrice = feeData.gasPrice; // Current gas price as a bigint
+        const valueInWei = ethers.parseEther(amount); // Parse ETH to Wei as a bigint
+        const gasLimit = 21000n; // Gas limit as a bigint
 
-        // Gas cost for transaction
-        const gasLimit = 21000; // Standard gas for ETH transfer
-        const gasCost = maxFeePerGas//.mul(gasLimit); // Total gas cost (wei)
+        // Calculate the total cost (value + gas fee) using bigint arithmetic
+        const totalCost = valueInWei + (gasPrice * gasLimit);
 
-        const totalCost = ethers.parseEther(amount).add(gasCost); // Total cost = transaction value + gas cost
-
-        // Ensure both balance and totalCost are BigNumbers
-        const balanceBigNumber = ethers.parseEther(balanceInEther); // Convert balance string to BigNumber
-
-        // Check if balance is sufficient for both transaction amount and gas fees
-        if (balanceBigNumber.lt(totalCost)) {
+        if (balance < totalCost) {
             alert("Insufficient funds to cover the transaction and gas fees.");
             return;
         }
@@ -80,13 +73,11 @@ document.getElementById("sendETH").addEventListener("click", async () => {
         // Indicate transaction is being sent
         document.getElementById("status").textContent = "Transaction pending...";
 
-        // Send the transaction with EIP-1559 parameters
+        // Send the transaction
         const tx = await signer.sendTransaction({
             to: recipient,
-            value: ethers.parseEther(amount),
-            gasLimit: gasLimit, // Standard gas for ETH transfer
-            maxFeePerGas: maxFeePerGas, // EIP-1559 maxFeePerGas
-            maxPriorityFeePerGas: maxPriorityFeePerGas, // EIP-1559 maxPriorityFeePerGas
+            value: valueInWei,
+            gasLimit: Number(gasLimit), // Convert bigint to a regular number
         });
 
         console.log("Transaction sent:", tx);
@@ -98,4 +89,5 @@ document.getElementById("sendETH").addEventListener("click", async () => {
         console.error("Transaction failed:", error);
         alert(`Transaction failed: ${error.reason || error.message}`);
     }
+
 });
