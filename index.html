@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SendETH DApp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>SendETH DApp</h1>
+    <button id="connectWallet">Connect Wallet</button>
+    <p id="accountInfo"></p>
+    <p id="balance"></p>
+
+    <h2>Send ETH</h2>
+    <input type="text" id="recipient" placeholder="Recipient Address">
+    <input type="number" id="amount" placeholder="Amount in ETH">
+    <button id="sendETH">Send ETH</button>
+    <p id="status"></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js" type="module"></script>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
